@@ -36,25 +36,6 @@ class MenuBar implements View {
 		return should;
 
 	}
-	function redrawPlay(size:Float,color:kha.Color){
-		ui.g.end();
-		playImage = Image.createRenderTarget(Std.int(size),Std.int(size));
-		playImage.g2.begin(true,kha.Color.Transparent);
-		playImage.g2.color = color;
-		playImage.g2.fillTriangle(0,0,0,size,size,size*0.5);
-		playImage.g2.end();
-		ui.g.begin(false);
-	}
-	function redrawPause(size:Float,color:kha.Color){
-		ui.g.end();
-		pauseImage = Image.createRenderTarget(Std.int(size),Std.int(size));
-		pauseImage.g2.begin(true,kha.Color.Transparent);
-		pauseImage.g2.color = color;
-		pauseImage.g2.fillRect(0,0,size * 0.15,size);
-		pauseImage.g2.fillRect(size * 0.5,0,size * 0.15,size);
-		pauseImage.g2.end();
-		ui.g.begin(false);
-	}
 	var animateIn:Bool = false;
 	var animateOut:Bool = false;
 	var lastColor:kha.Color = kha.Color.White;
@@ -110,20 +91,17 @@ class MenuBar implements View {
 		ui.t.WINDOW_BG_COL = ui.t.SEPARATOR_COL;
 		if (ui.window(menuHandle, Std.int(element.x), Std.int(this.y), Std.int(element.width),Std.int(element.height))) {
 			var w = ui.BUTTON_H() > element.height ? element.height: ui.BUTTON_H();
-			if(shouldRedraw(playImage,w,w)){
-				redrawPlay(w,ui.t.ACCENT_COL);
-			}
-			if(shouldRedraw(pauseImage,w,w)){
-				redrawPause(w,ui.t.ACCENT_COL);
-			}
 			var _w = ui._w;
 			ui._x += 1; // Prevent "File" button highlight on startup
-
+			var but_h = ui.t.BUTTON_H;
+			ui.t.BUTTON_H = Std.int(element.height);
 			Ext.beginMenu(ui);
 
-			var menuCategories = 5;
+			ui.t.BUTTON_H = but_h;
+
+			var menuCategories = 3;
 			for (i in 0...menuCategories) {
-				var categories = [tr("File"), tr("Edit"), tr("Viewport"), tr("Camera"), tr("Help")];
+				var categories = [tr("File"), tr("Edit"), tr("Help")];
 				var pressed = Ext.menuButton(ui, categories[i]);
 				if(pressed && Menu.show){
 					Menu.show = false;

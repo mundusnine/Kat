@@ -14,9 +14,7 @@ import kat.tool.Config;
 @:enum abstract MenuCategory(Int) from Int to Int {
 	var MenuFile = 0;
 	var MenuEdit = 1;
-	var MenuViewport = 2;
-	var MenuCamera = 3;
-	var MenuHelp = 4;
+	var MenuHelp = 2;
 }
 
 
@@ -47,7 +45,7 @@ class Menu {
     static var camControlRightHandle:Handle = Id.handle();
     static var camControlUpHandle:Handle = Id.handle();
     static var camControlDownHandle:Handle = Id.handle();
-    static final menuItemsCount = [6, 1, 4,5, 3];
+    static final menuItemsCount = [6, 1, 3];
     @:access(zui.Zui,EditorUi,EditorHierarchy)
     public static function render(g:kha.graphics2.Graphics){
 

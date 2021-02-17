@@ -5,13 +5,13 @@ import kha.input.KeyCode;
 class Input {
 
 	public static var occupied = false;
-	static var mouse: Mouse = null;
-	static var pen: Pen = null;
-	static var keyboard: Keyboard = null;
+	static var mouse:Null<Mouse> = null;
+	static var pen: Null<Pen> = null;
+	static var keyboard: Null<Keyboard> = null;
 	static var gamepads: Array<Gamepad> = [];
-	static var sensor: Sensor = null;
+	static var sensor: Null<Sensor> = null;
 	static var registered = false;
-	public static var virtualButtons: Map<String, VirtualButton> = null; // Button name
+	public static var virtualButtons: Null<Map<String, VirtualButton>> = null; // Button name
 
 	public static function reset() {
 		occupied = false;
@@ -59,7 +59,7 @@ class Input {
 		return keyboard;
 	}
 
-	public static function getGamepad(i = 0): Gamepad {
+	public static function getGamepad(i = 0): Null<Gamepad> {
 		if (i >= 4) return null;
 		if (!registered) register();
 		while (gamepads.length <= i) gamepads.push(new Gamepad(gamepads.length));
@@ -72,7 +72,7 @@ class Input {
 		return sensor;
 	}
 
-	public static function getVirtualButton(virtual: String): VirtualButton {
+	public static function getVirtualButton(virtual: String): Null<VirtualButton> {
 		if (!registered) register();
 		if (virtualButtons == null) return null;
 		return virtualButtons.get(virtual);
@@ -82,7 +82,7 @@ class Input {
 		registered = true;
 		UIManager.notifyOnEndFrame(endFrame);
 		// Reset mouse delta on foreground
-		kha.System.notifyOnApplicationState(function() { getMouse().reset(); }, null, null, null, null);
+		kha.System.notifyOnApplicationState(function() { getMouse().reset(); }, function() {}, function() {}, function() {}, function() {});
 	}
 }
 
@@ -94,7 +94,7 @@ class VirtualButton {
 }
 
 class VirtualInput {
-	var virtualButtons: Map<String, VirtualButton> = null; // Button id
+	var virtualButtons: Null<Map<String, VirtualButton>> = null; // Button id
 
 	public function setVirtual(virtual: String, button: String) {
 		if (Input.virtualButtons == null) Input.virtualButtons = new Map<String, VirtualButton>();
@@ -102,11 +102,17 @@ class VirtualInput {
 		var vb = Input.virtualButtons.get(virtual);
 		if (vb == null) {
 			vb = new VirtualButton();
-			Input.virtualButtons.set(virtual, vb);
+			if(Input.virtualButtons != null)
+				Input.virtualButtons.set(virtual, vb);
 		}
 
-		if (virtualButtons == null) virtualButtons = new Map<String, VirtualButton>();
-		virtualButtons.set(button, vb);
+		if (virtualButtons == null)
+		{
+			virtualButtons = new Map<String, VirtualButton>();
+		} 
+		else {
+			virtualButtons.set(button, vb);
+		}
 	}
 
 	function downVirtual(button: String) {
@@ -398,7 +404,8 @@ class Keyboard extends VirtualInput {
 	  @return	Bool. Returns true or false depending on the keyboard state.
 	**/
 	public function down(key: String): Bool {
-		return keysDown.get(key);
+		var out:Null<Bool> = keysDown.get(key);
+		return out == null ? false : out;
 	}
 
 	/**
@@ -407,7 +414,8 @@ class Keyboard extends VirtualInput {
 	  @return	Bool. Returns true or false depending on the keyboard state.
 	**/
 	public function started(key: String): Bool {
-		return keysStarted.get(key);
+		var out:Null<Bool> = keysStarted.get(key);
+		return out == null ? false : out;
 	}
 
 	/**
@@ -416,7 +424,8 @@ class Keyboard extends VirtualInput {
 	  @return	Bool. Returns true or false depending on the keyboard state.
 	**/
 	public function released(key: String): Bool {
-		return keysReleased.get(key);
+		var out:Null<Bool> = keysReleased.get(key);
+		return out == null ? false : out;
 	}
 
 	/**
@@ -425,7 +434,8 @@ class Keyboard extends VirtualInput {
 	  @return	Bool. Returns true or false depending on the keyboard state.
 	**/
 	public function repeat(key: String): Bool {
-		return keysStarted.get(key) || (repeatKey && keysDown.get(key));
+		var out:Null<Bool> = keysStarted.get(key) || (repeatKey && keysDown.get(key));
+		return out == null ? false : out;
 	}
 
 	public static function getKeyCodeStringValues(): Array<String> {

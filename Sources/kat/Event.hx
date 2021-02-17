@@ -20,7 +20,7 @@ class Event {
 					}
 	}
 
-	public static function get(name: String): Array<TEvent> {
+	public static function get(name: String): Null<Array<TEvent>> {
 		return events.get(name);
 	}
 

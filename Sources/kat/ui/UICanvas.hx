@@ -6,24 +6,35 @@ import haxe.ds.Either;
 import zui.Zui;
 import zui.Canvas;
 
+#if js
+typedef CanvasElem = {
+#else
+@:structInit class CanvasElem{
+#end
+	public var name:String;
+	public var func:kha.graphics2.Graphics->TElement->Void;
+}
+
 class UICanvas {
 
 
-	var cui: Zui;
-	var canvas: TCanvas = null;
-	var baseWidth:Int;
-	var baseHeight:Int;
+	var cui: Null<Zui>;
+	var canvas:Null<TCanvas> = null;
+	var baseWidth:Int = 0;
+	var baseHeight:Int = 0;
     
-    var customDraw:Map<String,kha.graphics2.Graphics->TElement->Void>;
+    var customDraw:Array<CanvasElem>;
 
 	var _render2D:Array<Graphics->Void> = [];
-	public var ready(get, null): Bool;
+	public var ready(get, null): Bool = false;
 	function get_ready(): Bool { return canvas != null; }
 
     public var visible(default,set):Bool = true;
     function set_visible(visible: Bool){
-        this.visible = visible; 
-        for (e in canvas.elements) e.visible = visible;
+		this.visible = visible;
+		if(canvas != null){
+			for (e in canvas.elements) e.visible = visible;
+		}
         return this.visible;
 	}
 
@@ -35,7 +46,7 @@ class UICanvas {
 	 */
 	public function new(canvasName: String,b_canvas:kha.Blob=null) {
         
-        customDraw = new Map<String,kha.graphics2.Graphics->TElement->Void>();
+        customDraw = new Array<CanvasElem>();
         var done = function(blob: kha.Blob) {
 
             var onFontDone =  function(f: kha.Font) {
@@ -50,7 +61,7 @@ class UICanvas {
                         var file = asset.file;
                         kha.Assets.loadImageFromPath(file,true, function(image: kha.Image) {
                             Canvas.assetMap.set(asset.id, image);
-                            if (++loaded >= c.assets.length) canvas = c;
+                            if (c.assets != null && ++loaded >= c.assets.length) canvas = c;
                         });
                     }
                 }
@@ -67,8 +78,8 @@ class UICanvas {
         }
 		
 		notifyOnReady(function(){
-			baseWidth = canvas.width;
-			baseHeight = canvas.height;
+			if(canvas != null) baseWidth = canvas.width;
+			if(canvas != null) baseHeight = canvas.height;
 		});
 		notifyOnRender2D(render);
 	}
@@ -76,7 +87,7 @@ class UICanvas {
 	public function notifyOnRender2D(r:Graphics->Void) {
 		_render2D.push(r);
 	}
-	var onReady: Void->Void = null;
+	var onReady: Null<Void->Void> = null;
 	public function notifyOnReady(f: Void->Void) {
 		onReady = f;
 	}
@@ -91,10 +102,10 @@ class UICanvas {
 		var events = Canvas.draw(cui, canvas, g);
 
 		g.end();
-		for(key in customDraw.keys()){
-			var element = getElement(key);
+		for(i in 0...customDraw.length){
+			var element = getElement(customDraw[i].name);
 			if(element != null){
-				customDraw.get(key)(g,element);
+				customDraw[i].func(g,element);
 			}
 		}
 
@@ -120,8 +131,8 @@ class UICanvas {
 	 * @param name The name of the element
 	 * @return TElement
 	 */
-	public function getElement(name: String): TElement {
-		for (e in canvas.elements) if (e.name == name) return e;
+	public function getElement(name: String):Null<TElement> {
+		if(canvas != null) for (e in canvas.elements) if (e.name == name) return e;
 		return null;
 	}
 
@@ -130,7 +141,7 @@ class UICanvas {
 	 * @return Array<TElement>
 	 */
 	public function getElements(): Array<TElement> {
-		return canvas.elements;
+		return canvas != null ? canvas.elements : [];
 	}
 
 	/**
@@ -146,7 +157,8 @@ class UICanvas {
 	 * @param factor Scale factor.
 	 */
 	 public function setUiScale(factor:Float) {
-		cui.setScale(factor);
+		if(cui != null)
+			cui.setScale(factor);
 	}
 
 	
@@ -194,9 +206,16 @@ class UICanvas {
     }
     
     public function addCustomDraw(name:String, func:kha.graphics2.Graphics->TElement->Void){
-		customDraw.set(name,func);
+		customDraw.push({name:name,func: func});
     }
     public function removeCustomDraw(name:String){
-		customDraw.remove(name);
+		var index:Int = 0;
+		for(i in 0...customDraw.length){
+			if(customDraw[i].name == name){
+				index  = i;
+				break;
+			}
+		}
+		customDraw.remove(customDraw[index]);
     }
 }

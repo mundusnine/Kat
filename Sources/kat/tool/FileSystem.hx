@@ -7,5 +7,8 @@ class FileSystem {
     public static function readDirectory(path:String):Array<String> {
         return [];
     }
+    public static function exists(path:String):Bool{
+        return false;
+    }
 }
 #end

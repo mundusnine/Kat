@@ -1,5 +1,9 @@
 package kat;
 
+import kat.ui.LocalLibrary;
+import kat.ui.SidePanel;
+import kat.ui.SideTab;
+import kat.ui.Panel;
 import kat.tool.Config;
 import kat.ui.MenuBar;
 import kat.tool.BuildMacros;
@@ -13,7 +17,8 @@ class UIManager {
     var ui:Zui;
     static var _endFrame:Array<Void->Void> = [];
     public static var sha:String = BuildMacros.sha();
-    public static var popupui:Zui;
+    public static var popupui:Null<Zui>;
+    public static var title_size = 48;
     var menu:MenuBar;
     public function new() {
         ui = new Zui({font: kha.Assets.fonts.font_default});
@@ -23,21 +28,33 @@ class UIManager {
         menu  = new MenuBar();
         var elemName = "Header";
         listViews[0].addToElementDraw(elemName,menu);
+        var sidePanel = new SidePanel();
+        sidePanel.addTab(new SideTab());
+        listViews[0].addToElementDraw("Side",sidePanel);
+        var mainPanel = new Panel();
+        mainPanel.addTab(new LocalLibrary());
+        listViews[0].addToElementDraw("Main",mainPanel);
 
     }
     
     @:access(kat.ui.AppView)
     public function render(g2:Graphics) {
 
+        var isClear = true;
+        var bgColor = isClear ? ui.t.WINDOW_BG_COL : null;
+
+        ui.enabled = !zui.Popup.show; 
+
         if(listViews.length > 0 && listViews[currentView].ready && listViews[currentView].visible){
-            var isClear = true;
-            var bgColor = isClear ? ui.t.WINDOW_BG_COL : null;
             g2.begin(isClear,bgColor);
             for(f in listViews[currentView]._render2D)f(g2);
             g2.end();
         }
         if(Menu.show){
             Menu.render(g2);
+        }
+        if(zui.Popup.show){
+            zui.Popup.render(g2);
         }
         //EndFrame
         for(f in _endFrame) f();

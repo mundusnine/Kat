@@ -26,7 +26,7 @@ class Url {
 		#end
 	}
 
-	public static function downloadBytes(url: String): Bytes {
+	public static function downloadBytes(url: String): Null<Bytes> {
         #if krom
 		var save = Path.data() + Path.sep + "download.bin";
 		download(url, save);

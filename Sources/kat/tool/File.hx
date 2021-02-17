@@ -8,5 +8,8 @@ class File {
     public static function saveBytes(path:String,bytes:Bytes) {
         
     }
+    public static function getBytes(path:String):haxe.io.Bytes {
+        return haxe.io.Bytes.ofString("");
+    }
 }
 #end
