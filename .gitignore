@@ -1,2 +1,4 @@
 build
 typing_extensions*
+.vscode/*.json
+!.vscode/tasks.json
